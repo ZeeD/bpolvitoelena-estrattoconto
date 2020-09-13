@@ -2,6 +2,7 @@ import dataclasses
 import datetime
 import decimal
 import json
+import logging
 import os
 import tempfile
 import typing
@@ -9,6 +10,9 @@ import typing
 import camelot
 
 from . import matrixtools, converttools, types
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def extract(in_: typing.BinaryIO) -> types.EstrattoConto:
@@ -27,14 +31,7 @@ def extract(in_: typing.BinaryIO) -> types.EstrattoConto:
 
     rows: typing.List[types.Row] = []
     for table in tables:
-        print('table: ', table)
-        # all as string
-        # data = table.data[...][0]
-        # valuta = table.data[...][1]
-        # addebiti = table.data[...][2]
-        # accrediti = table.data[...][3]
-        # descrizione_operazioni = table.data[...][4--]
-        # nota: descrizione va a capo, ci sono righe "vuote" dedicate
+        LOGGER.info('[table: %s]', table)
 
         data = matrixtools.merge_rows(matrixtools.merge_columns(table.data))
         rows.extend(map(converttools.convert, data))

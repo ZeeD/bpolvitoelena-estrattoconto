@@ -2,8 +2,11 @@
 
 from glob import glob
 from sys import argv
+import logging
 
 import estrattoconto
+
+LOGGER = logging.getLogger(__name__)
 
 
 def main() -> None:
@@ -15,8 +18,15 @@ def main() -> None:
         for infn in glob(arg):
             outfn = infn.replace('.pdf', '.json')
 
+            LOGGER.info(' - convert %s to %s', infn, outfn)
+
             estrattoconto.extract(infn, outfn)
 
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        format='[%(asctime)s][%(levelname)-8s][%(name)s] %(module)s.%(funcName)s%(message)s',
+        level=logging.INFO)
+    logging.getLogger('pdfminer').setLevel(logging.WARNING)
+    logging.getLogger('camelot').setLevel(logging.WARNING)
     main()
