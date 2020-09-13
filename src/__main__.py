@@ -13,7 +13,7 @@ def main() -> None:
 
     for arg in args:
         for infn in glob(arg):
-            outfn = infn.replace('.pdf', '.txt')
+            outfn = infn.replace('.pdf', '.json')
 
             estrattoconto.extract(infn, outfn)
 
