@@ -6,27 +6,13 @@ import os
 import tempfile
 import typing
 
+from mypy.strconv import indent
 import camelot
 
-
-@dataclasses.dataclass
-class Row:
-    data: datetime.date
-    valuta: datetime.date
-    addebiti: decimal.Decimal
-    accrediti: decimal.Decimal
-    descrizione_operazioni: str
+from . import matrixtools, converttools, types
 
 
-@dataclasses.dataclass
-class EstrattoConto:
-    n: str
-    intestato: str
-    iban: str
-    rows: typing.List[Row]
-
-
-def extract(in_: typing.BinaryIO) -> EstrattoConto:
+def extract(in_: typing.BinaryIO) -> types.EstrattoConto:
     'basic extraction of the informations from the pdf'
     temp = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False)
     try:
@@ -40,6 +26,7 @@ def extract(in_: typing.BinaryIO) -> EstrattoConto:
     finally:
         os.remove(temp.name)
 
+    rows: typing.List[types.Row] = []
     for table in tables:
         print('table: ', table)
         # all as string
@@ -50,10 +37,13 @@ def extract(in_: typing.BinaryIO) -> EstrattoConto:
         # descrizione_operazioni = table.data[...][4--]
         # nota: descrizione va a capo, ci sono righe "vuote" dedicate
 
-    return None
+        data = matrixtools.merge_rows(matrixtools.merge_columns(table.data))
+        rows.extend(map(converttools.convert, data))
+
+    return types.EstrattoConto('', '', '', rows)
 
 
-def to_string(estratto_conto: EstrattoConto) -> str:
+def to_string(estratto_conto: types.EstrattoConto) -> str:
     'fancy __repr__'
 
     class E(json.JSONEncoder):
@@ -66,9 +56,9 @@ def to_string(estratto_conto: EstrattoConto) -> str:
                 return dataclasses.asdict(o)
             return super().default(o)
 
-    return json.dumps(estratto_conto, cls=E)
+    return json.dumps(estratto_conto, cls=E, indent=4)
 
 
-def serialize(estratto_conto: EstrattoConto, out: typing.TextIO) -> None:
+def serialize(estratto_conto: types.EstrattoConto, out: typing.TextIO) -> None:
     'write the estratto conto to the outstream'
     out.write(to_string(estratto_conto))
