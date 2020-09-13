@@ -6,7 +6,6 @@ import os
 import tempfile
 import typing
 
-from mypy.strconv import indent
 import camelot
 
 from . import matrixtools, converttools, types

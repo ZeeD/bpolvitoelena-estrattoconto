@@ -4,7 +4,7 @@ import typing
 Matrix = typing.Iterable[typing.List[str]]
 
 
-def merge_columns(it: Matrix, n=4, sep=' ') -> Matrix:
+def merge_columns(it: Matrix, n: int=4, sep: str=' ') -> Matrix:
     '''merge all columns>=n, for each row in it
     merge_columns([[foo,bar,baz],[pippo,pluto,paperino]],1) ->
             [[foo, bar baz], [pippo, pluto paperino]]'''
@@ -19,7 +19,7 @@ def merge_columns(it: Matrix, n=4, sep=' ') -> Matrix:
         yield row
 
 
-def merge_rows(it: Matrix, i=0, sep=' ') -> Matrix:
+def merge_rows(it: Matrix, i: int=0, sep: str=' ') -> Matrix:
     '''merge rows splitted in multiple rows.
     for every row in it, inspect the first column.
     if empty, merge the other rows in the previous row
@@ -47,15 +47,13 @@ def merge_rows(it: Matrix, i=0, sep=' ') -> Matrix:
                 previous_row = row
         else:
             # this is a continuation
-            if previous_row is None:
-                # wtf?
-                raise Exception(
-                    f'no {row}[{i}] and previous_row is {previous_row}')
-            else:
-                # this row is a continuation of the previous one
-                for j, cell in enumerate(row):
-                    if i != j:  # ignore the "id"
-                        previous_row[j] += sep + cell
+            assert previous_row is not None
+
+            # this row is a continuation of the previous one
+            for j, cell in enumerate(row):
+                if i != j:  # ignore the "id"
+                    previous_row[j] += sep + \
+                        cell  # pylint: disable=unsupported-assignment-operation
 
     if previous_row is not None:
         yield previous_row
